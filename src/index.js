@@ -1,73 +1,5 @@
-const firebaseConfig = {
-    apiKey: "AIzaSyD10s9TNvVnZDETCZ3WPDNWYNlT1czpjBs",
-    authDomain: "mycoachai-code-assignment.firebaseapp.com",
-    projectId: "mycoachai-code-assignment",
-    storageBucket: "mycoachai-code-assignment.appspot.com",
-    messagingSenderId: "195035549126",
-    appId: "1:195035549126:web:14ac151adb25672931b6c7",
-    measurementId: "G-SZDMXH7N5B"
-};
-
-const app = firebase.initializeApp(firebaseConfig);
-const db = firebase.firestore();
-
-const uploadVideoFile = (file, uploadTitle, timestamp) => {
-    const ref = firebase.storage().ref();
-
-    const metadata = {
-        contentType: file.type
-    };
-
-    const fileName = uploadTitle + "-" + timestamp
-
-    const imageRef = ref.child(fileName).put(file, metadata);
-    
-    return imageRef
-        .then(snapshot => snapshot.ref.getDownloadURL())
-        .catch(error => {throw error;});
-}
-
-function getVideoThumbnail(file, seekTo = 0.0) {
-    return new Promise((resolve, reject) => {
-        // load the file to a video player
-        const videoPlayer = document.createElement('video');
-        videoPlayer.setAttribute('src', URL.createObjectURL(file));
-        videoPlayer.load();
-        videoPlayer.addEventListener('error', (ex) => {
-            reject("error when loading video file", ex);
-        });
-        // load metadata of the video to get video duration and dimensions
-        videoPlayer.addEventListener('loadedmetadata', () => {
-            // seek to user defined timestamp (in seconds) if possible
-            if (videoPlayer.duration < seekTo) {
-                reject("video is too short.");
-                return;
-            }
-            // delay seeking or else 'seeked' event won't fire on Safari
-            setTimeout(() => {
-              videoPlayer.currentTime = seekTo;
-            }, 200);
-            // extract video thumbnail once seeking is complete
-            videoPlayer.addEventListener('seeked', () => {
-                // define a canvas to have the same dimension as the video
-                const canvas = document.createElement("canvas");
-                canvas.width = videoPlayer.videoWidth;
-                canvas.height = videoPlayer.videoHeight;
-                // draw the video frame to canvas
-                const ctx = canvas.getContext("2d");
-                ctx.drawImage(videoPlayer, 0, 0, canvas.width, canvas.height);
-                // return the canvas image as a blob
-                ctx.canvas.toBlob(
-                    blob => {
-                        resolve(blob);
-                    },
-                    "image/jpeg",
-                    0.75 /* quality */
-                );
-            });
-        });
-    });
-}
+import { uploadVideoFile, writeFirestoreDocument, getCourses, getVideos } from "./firestore.js"
+import { getVideoThumbnail } from "./thumbnail.js"
 
 const writeVideoToFirestore = async () => {
     const file = document.getElementById('upload-video').files[0];
@@ -81,45 +13,27 @@ const writeVideoToFirestore = async () => {
 
     const urls = await Promise.all([uploadVideoFile(file, uploadTitle, timestamp), uploadVideoFile(cover, uploadTitle+"-thumbnail", timestamp)])
 
+    const activeCourse = document.getElementsByClassName("course_select active")?.[0]
+    const courseName = activeCourse.innerText
+
     const videoUpload = {
         id: String(timestamp), 
         title: uploadTitle,
         description: uploadDescription,
         videoUrl: urls[0],
         thumbnailUrl: urls[1],
-        courseName: '' // TODO: add active course name here
+        courseName
     }
 
-    db.collection("videos").doc(String(timestamp)).set(videoUpload)
-    console.log('done')
+    writeFirestoreDocument("videos", String(timestamp), videoUpload)
+
+    loadCourseVideos(courseName)
 }
 
-const uploadEl = document.getElementById("upload");
-
-uploadEl.addEventListener('click', function () {
-    try {
-        writeVideoToFirestore()
-    } catch (error) {
-        console.error(error)
-    }
-
-}, false);
-
 const loadCourseVideos = async (courseName) => {
+    clearDisplayedVideos()
 
-    const videos = await db.collection("videos").where("courseName", "==", courseName).get()
-        .then((querySnapshot) => {
-            const videos = []
-
-            querySnapshot.forEach((doc) => {
-                videos.push({...doc.data()})
-            });
-
-            return videos
-        })
-        .catch((error) => {
-            console.log("Error getting documents: ", error);
-        });
+    const videos = await getVideos(courseName)
 
 
     videos.forEach((video, index) => {
@@ -154,22 +68,24 @@ const loadCourseVideos = async (courseName) => {
     
         videosContainer.appendChild(courseItem)
     })
+
+    return Promise.resolve()
+}
+
+const removeActiveCourseClass = () => {
+    const courses = document.getElementsByClassName("course_select")
+
+    Array.from(courses).forEach(course => course.className = "course_select")
+}
+
+const clearDisplayedVideos = () => {
+    const courseItems = document.getElementsByClassName("course_item")
+
+    Array.from(courseItems).forEach(courseItem => courseItem.parentNode.removeChild(courseItem))
 }
 
 const loadCourses = async () => {
-    const courses = await db.collection("courses").get()
-        .then((querySnapshot) => {
-            const courses = []
-
-            querySnapshot.forEach((doc) => {
-                courses.push({...doc.data()})
-            });
-
-            return courses
-        })
-        .catch((error) => {
-            console.log("Error getting documents: ", error);
-        });
+    const courses = await getCourses()
 
     courses.forEach((course, index) => {
         const courseContainer = document.getElementById('courses')
@@ -180,17 +96,13 @@ const loadCourses = async () => {
         courseTitle.innerText = course?.courseName
 
         courseTitle.addEventListener('click', function(event) {
-            const courses = document.getElementsByClassName("course_select")
-
-            Array.from(courses).forEach(course => course.className = "course_select")
+            removeActiveCourseClass()
 
             const active = document.getElementById(event.target.id)
             
             active.className = "course_select active"
 
-            const courseItems = document.getElementsByClassName("course_item")
-
-            Array.from(courseItems).forEach(courseItem => courseItem.parentNode.removeChild(courseItem))
+            clearDisplayedVideos()
 
             loadCourseVideos(active.innerText)
         });
@@ -198,10 +110,66 @@ const loadCourses = async () => {
         courseContainer.appendChild(courseTitle)
     })
 
-    loadCourseVideos(courses[0]?.courseName)
+    loadCourseVideos(courses[0]?.courseName)    
 }
 
-const courseEl = document.getElementById("upload");
+const addCourse = () => {
+    const courseContainer = document.getElementById('courses')
+
+    const courseTitleInput = document.createElement('input')
+    courseTitleInput.id = "course-title-input"
+    courseTitleInput.className = "course_select active"
+
+    document.getElementById('new-course').style.display = "none"
+
+    removeActiveCourseClass()
+
+    clearDisplayedVideos()
+
+    courseTitleInput.addEventListener('keyup', async function(event) {
+        if (event.key === 'Enter') {
+            const newCourseName = document.getElementById('course-title-input').value
+
+            await writeFirestoreDocument("courses", newCourseName, {newCourseName})
+
+            document.getElementById('courses').innerHTML = ""
+
+            await loadCourses()
+
+            document.getElementById('new-course').style = "display: block;"
+
+            const reloadedCourses = document.getElementsByClassName("course_select")
+
+            Array.from(reloadedCourses).forEach(course => {
+                course.className = "course_select"
+                if (course.innerText == newCourseName) 
+                    course.className = "course_select active"
+            })
+
+            loadCourseVideos(newCourseName)  
+        }  
+
+    });
+
+    courseContainer.appendChild(courseTitleInput)
+}
+
+const uploadEl = document.getElementById("upload");
+uploadEl.addEventListener('click', function () {
+    try {
+        writeVideoToFirestore()
+    } catch (error) {
+        console.error(error)
+    }
+
+}, false);
+
+
+const newCourseEl = document.getElementById("new-course");
+newCourseEl.addEventListener('click', function(event) {
+    addCourse()
+});
+
 
 window.addEventListener('load', function(event) {
     loadCourses()
