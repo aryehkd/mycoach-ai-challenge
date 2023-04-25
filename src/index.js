@@ -103,14 +103,16 @@ const loadCourses = async () => {
             active.className = "course_select active"
 
             clearDisplayedVideos()
+            loadCourseVideos(event.target.innerText)    
 
-            loadCourseVideos(active.innerText)
+
+            document.getElementById('course-heading').value = active.innerText
         });
 
         courseContainer.appendChild(courseTitle)
-    })
+    })   
 
-    loadCourseVideos(courses[0]?.courseName)    
+    document.getElementById('course-heading').value = courses[0]?.courseName
 }
 
 const addCourse = () => {
@@ -130,7 +132,7 @@ const addCourse = () => {
         if (event.key === 'Enter') {
             const newCourseName = document.getElementById('course-title-input').value
 
-            await writeFirestoreDocument("courses", newCourseName, {newCourseName})
+            await writeFirestoreDocument("courses", newCourseName, {courseName: newCourseName})
 
             document.getElementById('courses').innerHTML = ""
 
@@ -145,6 +147,8 @@ const addCourse = () => {
                 if (course.innerText == newCourseName) 
                     course.className = "course_select active"
             })
+
+            document.getElementById('course-heading').value = newCourseName
 
             loadCourseVideos(newCourseName)  
         }  
@@ -171,6 +175,9 @@ newCourseEl.addEventListener('click', function(event) {
 });
 
 
-window.addEventListener('load', function(event) {
-    loadCourses()
+window.addEventListener('load', async function(event) {
+    await loadCourses()
+
+    const activeCourse = document.getElementById('courses').children[0].innerText
+    loadCourseVideos(activeCourse)
 });
