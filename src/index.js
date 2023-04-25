@@ -2,10 +2,10 @@ import { uploadVideoFile, writeFirestoreDocument, getCourses, getVideos } from "
 import { getVideoThumbnail } from "./thumbnail.js"
 
 const writeVideoToFirestore = async () => {
-    const file = document.getElementById('upload-video').files[0];
+    const file = document.getElementById('upload-video').files[0]
 
-    const uploadTitle = document.getElementById('upload-title').value;
-    const uploadDescription = document.getElementById('upload-desc').value;
+    const uploadTitle = document.getElementById('upload-title').value
+    const uploadDescription = document.getElementById('upload-desc').value
 
     const cover = await getVideoThumbnail(file)
 
@@ -26,6 +26,9 @@ const writeVideoToFirestore = async () => {
     }
 
     writeFirestoreDocument("videos", String(timestamp), videoUpload)
+
+    document.getElementById('upload-title').value = ""
+    document.getElementById('upload-desc').value =""
 
     loadCourseVideos(courseName)
 }
@@ -107,7 +110,7 @@ const loadCourses = async () => {
 
 
             document.getElementById('course-heading').value = active.innerText
-        });
+        })
 
         courseContainer.appendChild(courseTitle)
     })   
@@ -138,7 +141,7 @@ const addCourse = () => {
 
             await loadCourses()
 
-            document.getElementById('new-course').style = "display: block;"
+            document.getElementById('new-course').style = "display: block"
 
             const reloadedCourses = document.getElementsByClassName("course_select")
 
@@ -153,12 +156,12 @@ const addCourse = () => {
             loadCourseVideos(newCourseName)  
         }  
 
-    });
+    })
 
     courseContainer.appendChild(courseTitleInput)
 }
 
-const uploadEl = document.getElementById("upload");
+const uploadEl = document.getElementById("upload")
 uploadEl.addEventListener('click', function () {
     try {
         writeVideoToFirestore()
@@ -166,18 +169,18 @@ uploadEl.addEventListener('click', function () {
         console.error(error)
     }
 
-}, false);
+}, false)
 
 
-const newCourseEl = document.getElementById("new-course");
+const newCourseEl = document.getElementById("new-course")
 newCourseEl.addEventListener('click', function(event) {
     addCourse()
-});
+})
 
 
 window.addEventListener('load', async function(event) {
     await loadCourses()
 
-    const activeCourse = document.getElementById('courses').children[0].innerText
+    const activeCourse = document.getElementById('courses')?.children[0]?.innerText??""
     loadCourseVideos(activeCourse)
-});
+})
