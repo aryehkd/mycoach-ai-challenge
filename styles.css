@@ -1,0 +1,244 @@
+@import url('https://fonts.googleapis.com/css?family=Lato:300,400,700,900&display=swap');
+
+:root {
+  --content-width: 1360px;
+  --border-radius: 8px;
+
+  --font-head: clamp(1.88rem, calc(1.49rem + 1.92vw), 3.13rem);
+  --font-sub: clamp(1.06rem, calc(0.97rem + 0.48vw), 1.38rem);
+  --font-copy: clamp(0.94rem, calc(0.90rem + 0.19vw), 1.06rem);
+
+  --bg-color: #1f1f1f;
+  --light-bg-color: #444444;
+
+  --primary-color: #9cf74d;
+  --white-color: #e6e6e6;
+}
+
+
+/** RESETS **/
+
+body, html{
+  height: 100%;
+  width: 100%;
+}
+
+body{
+  margin: 0;padding: 0;
+  background: var(--bg-color);
+  overflow: hidden;
+  overflow-y: scroll;
+}
+
+body::-webkit-scrollbar{
+  width: 4px;
+    height: 10px;
+}
+
+body::-webkit-scrollbar-thumb{
+  background: var(--light-bg-color);
+  border-radius: 10px;
+}
+
+body::-webkit-scrollbar-track{
+  background: transparent;
+}
+
+*{
+  font-family: 'Lato', sans-serif;
+  color: var(--white-color);
+  box-sizing: border-box;
+}
+
+input{
+  background: transparent;
+  padding: 0 0 5px 0;
+  margin: 0;
+  outline: none;
+  border: none;
+  width: 100%;
+  font-size: var(--font-copy);
+  color: var(--white-color);
+  border-radius: 0;
+}
+
+input:disabled{
+  opacity: var(--focus-opacity);
+}
+
+input::placeholder{
+  opacity: 0.7;
+}
+
+label {
+  border: 2px dashed var(--white-color);
+  padding: 10px 20px;
+  cursor: pointer;
+  align-self: normal;
+  display: flex;
+  align-items: center;
+  border-radius: var(--border-radius);
+}
+
+h1, h2, h3, p, a{
+  margin: 0;
+}
+
+
+
+
+/** GRID **/
+
+
+.content_contain{
+  width: min(95%, var(--content-width));
+  margin: 70px auto 0 auto;
+  display: flex;
+  justify-content: space-between;
+  gap: 2%;
+  align-items: flex-start;
+}
+
+.col-35{
+  flex-basis: 34%;
+}
+
+.col-65{
+  flex-basis: 64%;
+}
+
+
+
+
+
+/** COURSE STYLING **/
+
+
+#courses{
+  display: flex;
+  flex-direction: column;
+  margin: 15px 0;
+  gap: 15px;
+}
+
+.course_select{
+  width: 100%;
+  padding: 30px 20px;
+  font-size: var(--font-sub);
+  background: var(--light-bg-color);
+  border-radius: var(--border-radius);
+  box-shadow: 0 0 0 2px var(--light-bg-color);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor:pointer;
+}
+
+.course_select:after{
+  content: '';
+  margin-left: 10px;
+  width: 0; 
+  height: 0; 
+  border-top: 6px solid transparent;
+  border-bottom: 6px solid transparent;
+  
+  border-left: 6px solid var(--white-color);
+}
+
+
+.course_select.active {
+  background: var(--bg-color);
+
+}
+
+
+
+#course-edit{
+  border-radius: var(--border-radius);
+  box-shadow: 0 0 0 2px var(--light-bg-color);
+  padding: 20px;
+  max-height: 640px;
+  overflow-y: scroll;
+}
+
+#course-edit::-webkit-scrollbar{
+  width: 8px;
+    height: 10px;
+}
+
+#course-edit::-webkit-scrollbar-thumb{
+  background: var(--light-bg-color);
+  border-radius: 10px;
+}
+
+#course-edit::-webkit-scrollbar-track{
+  background: transparent;
+}
+
+.course-edit_title{
+  font-size: var(--font-head);
+}
+
+.course-edit_upload{
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px 20px;
+  gap: 4%;
+  background: var(--light-bg-color);
+  border-radius: var(--border-radius);
+  margin: 20px 0;
+}
+
+.course-edit_upload_details{
+  flex: 1;
+}
+
+.course-edit_upload_details input:not(#upload-desc){
+  font-size: var(--font-sub);
+}
+
+.course_item{
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 3%;
+  margin: 15px 0;
+}
+
+.course_item .thumb{
+  width: 200px;
+  aspect-ratio: 16 / 9;
+}
+
+
+
+/** UI ELEMENTS **/
+
+.btn{
+  display: block;
+  width: 100%;
+  background: var(--primary-color);
+  border-radius: var(--border-radius);
+  color: var(--bg-color);
+  text-align: center;
+  font-size: var(--font-copy);
+  padding: 10px 20px;
+  cursor:pointer;
+}
+
+
+.upload-btn{
+  display: block;
+  background: var(--primary-color);
+  border-radius: var(--border-radius);
+  color: var(--bg-color);
+  text-align: center;
+  font-size: var(--font-copy);
+  width: 60px;
+  justify-content: center;
+  cursor: pointer;
+  align-self: normal;
+  display: flex;
+  align-items: center;
+}

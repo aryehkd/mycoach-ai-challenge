@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en-US">
+<head>
+
+	<meta charset="UTF-8">
+
+	<meta name="description" content="">
+	<meta name="keywords" content="">
+	<meta name="author" content="">
+
+	<title>Welcome back</title>
+	<link rel="stylesheet" type="text/css" href="styles.css?1.4.01">
+
+	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1,user-scalable=0">
+
+  	<!-- REMOVE ROBOTS -->
+	<meta name="robots" content="noindex">
+	
+</head>
+<body>
+	
+	<script src="https://www.gstatic.com/firebasejs/7.7.0/firebase-app.js"></script>
+	<script src="https://www.gstatic.com/firebasejs/7.7.0/firebase-storage.js"></script>
+	<script src="https://www.gstatic.com/firebasejs/7.7.0/firebase-firestore.js"></script>
+
+	<script src="src/index.js" type="module"></script>
+
+	<div class="content_contain">
+
+		<div class="col-35">
+			<p>Your Courses</p>
+
+			<!-- All courses should be populated here -->
+			<div id="courses">
+
+
+			</div>
+
+			<a id="new-course" class="btn">Create New Course</a>
+
+		</div>
+
+		<div class="col-65">
+
+			<!-- When editing a course it's content should be populated here -->
+			<div id="course-edit">
+
+				<input type="text" value="Journey to Loving Yoga" class="course-edit_title">
+
+				<div class="course-edit_upload">
+					<input id="upload-video" type="file" accept="video/*" style="display:none;">
+					<label for="upload-video">Upload</label>
+					<div class="course-edit_upload_details">
+						<input type="text" id="upload-title" placeholder="New Video Title...">
+						<input type="text" id="upload-desc" placeholder="New Video Description...">
+					</div>
+
+					<a class="upload-btn" id="upload">+</a> <!-- This button should trigger the upload function -->
+				</div>
+
+			</div>
+		</div>
+	</div>
+
+</body>
+</html>
